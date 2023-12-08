@@ -11,7 +11,7 @@ replace those values in this script.
 """
 import chardet
 
-path_to_file = 'test_chunk_read.txt'  # Path to SQL table flat file export
+path_to_file = '3 char delim and line ending.txt'  # Path to SQL table flat file export
 line_terminator = "#^#"  # Line terminator used in SQL export
 delimiter = "#|#"  # Delimiter used in SQL export
 
@@ -28,35 +28,31 @@ def process_chunk(chunk):
     return chunk.replace('\n', '').replace(line_terminator, '\n').replace(new_delimiter, '').replace(delimiter, new_delimiter)
 
 # Read, process, and write the file in chunks
-chunk_size = 5  # 1 MB
+chunk_size = 1024 * 1024 # 1 MB
 with open(path_to_file, 'r', encoding=encoding) as file:
     with open(new_path_to_file, 'w', encoding=new_encoding) as output_file:
         carry_over = ''
         while True:
-            chunk = carry_over + file.read(chunk_size)            
+            chunk = carry_over + file.read(chunk_size)
+            if not chunk:
+                break
             # Extend the read to include the next part of line_terminator
             extension = file.read(max(len(line_terminator), len(delimiter))-1)
-            
+            ch_ex = chunk + extension
             # if delimiter/line_terminator rfind on chunk + extension is different from delimiter/line_terminator rfind on chunk
             delim_rfind_ch = (chunk).rfind(delimiter)
             lineterm_rfind_ch = (chunk).rfind(line_terminator)
             delim_rfind_ch_ex = (chunk + extension).rfind(delimiter)
             lineterm_rfind_ch_ex = (chunk + extension).rfind(line_terminator)
+            cutoff = max(lineterm_rfind_ch_ex, delim_rfind_ch_ex)
             if (lineterm_rfind_ch_ex > lineterm_rfind_ch) or (delim_rfind_ch_ex > delim_rfind_ch):
-                
-            
-            print(chunk)
-            print(extension)
-            next_terminator_start = (chunk + extension).find(line_terminator[0])
-            if next_terminator_start != -1:
-                chunk += extension[:next_terminator_start]
-                carry_over = extension[next_terminator_start:]
+                chunk = ch_ex[:cutoff]
+                carry_over = ch_ex[cutoff:]
             else:
-                chunk += extension
-                carry_over = ''
-
-            if not chunk:
-                break
+                carry_over = extension
+            
+            # print(chunk)
+            # print(extension)
 
             processed_chunk = process_chunk(chunk)
             output_file.write(processed_chunk)
