@@ -1,3 +1,8 @@
+/*
+For each country that has had at last 1000 new cases in a single day, show the date of the peak number of new cases.
+*/
+
+
 SELECT B.NAME,
        Date_format(B.whn, '%Y-%m-%d'),
        ( B.confirmed - B.lag_confirmed ) AS peakNewCases,
