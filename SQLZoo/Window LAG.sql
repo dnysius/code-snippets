@@ -1,5 +1,5 @@
 /*
-For each country that has had at last 1000 new cases in a single day, show the date of the peak number of new cases.
+8. For each country that has had at last 1000 new cases in a single day, show the date of the peak number of new cases.
 */
 
 
